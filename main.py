@@ -43,17 +43,28 @@ def save_data_binaries(key):
     dataset_hash = datasets[key]
     path_key, targets_key, smiles_key = dataset_hash['Path'], dataset_hash['Y'], dataset_hash['X']
     path = os.getenv(path_key)
-    data = pd.read_csv(os.getenv(path))
+    data = pd.read_csv(path)
 
-    smiles, targets = data[smiles_key], data[targets_key]
-    zipped = list(zip(smiles, targets))
+    if key != 'Tox21':
+        smiles, targets = data[smiles_key], data[targets_key]
+        zipped = list(zip(smiles, targets))
 
-    f_num = 0
-    for i in zipped:
-        file_name = os.path.join(
-            os.getenv(dataset_hash['Bin_path']), str(f_num))
+        f_num = 0
+        for i in zipped:
+            file_name = os.path.join(
+                os.getenv(dataset_hash['Bin_path']), str(f_num))
 
-        with open(file_name, 'wb') as fp:
-            pickle.dump(i, fp)
-        f_num += 1
-    print("Binaries Saved!!!!!!")
+            with open(file_name, 'wb') as fp:
+                pickle.dump(i, fp)
+            print(f"File {f_num} saved....")
+            f_num += 1
+        print("Binaries Saved!!!!!!")
+        return
+
+
+if __name__ == '__main__':
+    ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21']
+    idx = int(input("Enter the Dataset index: "))
+
+    key = ds[idx]
+    save_data_binaries(key)
