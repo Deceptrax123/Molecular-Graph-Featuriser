@@ -46,7 +46,7 @@ class MolecularGraphDataset(Dataset):
         for raw_path in self.raw_paths:
             with open(raw_path, 'rb') as fp:
                 bin = pickle.load(fp)
-            data = graphs(fp)
+            data = graphs(bin)
 
             if self.pre_filter is not None and not self.pre_filter(data):
                 continue
