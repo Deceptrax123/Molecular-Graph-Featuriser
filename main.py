@@ -78,11 +78,11 @@ def save_data_binaries(key):
     return
 
 
-def download_function(p, datasets, key):
+def download_function(p, datasets, key, zinc):
     load_dotenv('.env')
     dataset_hash = datasets[key]
     dataset = MolecularGraphDataset(key=dataset_hash['Bin_path'], root=os.getenv(
-        dataset_hash['graph_root'])+p[1]+'/data/', start=p[0], step=5141)
+        dataset_hash['graph_root'])+p[1]+'/data/', start=p[0], step=31182, zinc=zinc)
 
 
 if __name__ == '__main__':
@@ -121,6 +121,10 @@ if __name__ == '__main__':
             'X': 'smiles',
             'Bin_path': 'tox_bins',
             'graph_root': 'tox_graph'
+        },
+        'Zinc': {
+            'Bin_path': 'zinc_bins',
+            'graph_root': 'zinc_graph'
         }
     }
 
@@ -141,19 +145,24 @@ if __name__ == '__main__':
     elif choice == 3:
         pretrainer_binaries()
     elif choice == 4:
-        ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21']
+        ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21', 'Zinc']
         idx = int(input("Enter the Dataset index: "))
         key = ds[idx]
 
-        params = [(0, 'Fold1'), (5141, 'Fold2'), (10282, 'Fold3'),
-                  (15423, 'Fold4'), (20564, 'Fold5'), (25705, 'Fold6'),
-                  (30846, 'Fold7'), (35987, 'Fold8')]
+        params = [(0, 'Fold1'), (31182, 'Fold2'), (62364, 'Fold3'),
+                  (93546, 'Fold4'), (124728, 'Fold5'), (155910, 'Fold6'),
+                  (187092, 'Fold7'), (218274, 'Fold8')]
         start_time = time.perf_counter()
         processes = list()
         n_processes = 8
+
+        zinc = False
+        if key == 'Zinc':
+            zinc = True
+
         for i in range(n_processes):
             p = multiprocessing.Process(
-                target=download_function, args=(params[i], datasets, key,))
+                target=download_function, args=(params[i], datasets, key, zinc))
             p.start()
 
             processes.append(p)

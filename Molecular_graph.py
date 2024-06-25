@@ -9,11 +9,13 @@ from Features import get_atom_features, get_bond_features
 import os
 
 
-def graphs(item):
+def graphs(item, zinc):
     load_dotenv('.env')
-
-    smiles = item[0]
-    label = item[1]
+    if not zinc:
+        smiles = item[0]
+        label = item[1]
+    else:
+        smiles = item
 
     mol = Chem.MolFromSmiles(smiles)
 
@@ -43,9 +45,12 @@ def graphs(item):
         edge_features[k] = get_bond_features(
             mol.GetBondBetweenAtoms(int(z), int(j)))
     edge_features = torch.tensor(edge_features, dtype=torch.float)
-
-    y = torch.tensor(label)
-    graph = Data(x=X, edge_index=edges,
-                 edge_attr=edge_features, y=y, smiles=smiles)
+    if not zinc:
+        y = torch.tensor(label)
+        graph = Data(x=X, edge_index=edges,
+                     edge_attr=edge_features, y=y, smiles=smiles)
+    else:
+        graph = Data(x=X, edge_index=edges,
+                     edge_attr=edge_features, y=None, smiles=smiles)
 
     return graph

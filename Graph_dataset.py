@@ -8,11 +8,12 @@ from Molecular_graph import graphs
 
 
 class MolecularGraphDataset(Dataset):
-    def __init__(self, key, start, root, step, transform=None, pre_transform=None, pre_filter=None):
+    def __init__(self, key, start, root, step, zinc, transform=None, pre_transform=None, pre_filter=None):
         self.key = key
         self.step = step
         self.start = start
         self.root = root
+        self.zinc = zinc
 
         super().__init__(root, transform, pre_transform, pre_filter)
 
@@ -46,7 +47,7 @@ class MolecularGraphDataset(Dataset):
         for raw_path in self.raw_paths:
             with open(raw_path, 'rb') as fp:
                 bin = pickle.load(fp)
-            data = graphs(bin)
+            data = graphs(bin, self.zinc)
 
             if self.pre_filter is not None and not self.pre_filter(data):
                 continue
