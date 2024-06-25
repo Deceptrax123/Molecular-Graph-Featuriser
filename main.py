@@ -5,12 +5,33 @@ from dotenv import load_dotenv
 import pickle
 import os
 import numpy as np
+from tdc.generation import MolGen
 
 
 def preprocess_tox21(data, cols):
     for c in cols:
         data[c] = data[c].fillna(data[c].mode()[0])
     return data
+
+
+def download_zinc():
+    data = MolGen(name='ZINC')
+
+
+def pretrainer_binaries():
+    load_dotenv('.env')
+
+    data = pd.read_csv("data/zinc.tab", sep='\t')
+    smiles = data['smiles']
+
+    for f_num in range(len(smiles)):
+        file_name = os.path.join(os.getenv('zinc_bins'), str(f_num))
+
+        with open(file_name, 'wb') as fp:
+            pickle.dump(smiles[f_num], fp)
+        print(f"File {f_num} saved.......")
+    print("Binaries for Zinc saved.....")
+    return
 
 
 def save_data_binaries(key):
@@ -88,8 +109,19 @@ def save_data_binaries(key):
 
 
 if __name__ == '__main__':
-    ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21']
-    idx = int(input("Enter the Dataset index: "))
+    print("Press 1 to save binaries for property datasets \
+          2 to download the zinc dataset \
+          3 to save binaries of the zinc dataset \
+          4 to save graphs for the property datasets \
+          5 to save graphs for the zinc dataset")
 
-    key = ds[idx]
-    save_data_binaries(key)
+    choice = int(input("Enter choice: "))
+    if choice == 1:
+        ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21']
+        idx = int(input("Enter the Dataset index: "))
+        key = ds[idx]
+        save_data_binaries(key)
+    elif choice == 2:
+        download_zinc()
+    elif choice == 3:
+        pretrainer_binaries()
