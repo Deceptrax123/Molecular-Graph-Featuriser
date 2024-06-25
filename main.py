@@ -4,7 +4,9 @@ import pandas as pd
 from dotenv import load_dotenv
 import pickle
 import os
+import time
 import numpy as np
+from Graph_dataset import MolecularGraphDataset
 from tdc.generation import MolGen
 
 
@@ -36,38 +38,6 @@ def pretrainer_binaries():
 
 def save_data_binaries(key):
     load_dotenv('.env')
-    datasets = {
-        'HIV': {
-            'Path': 'HIV_csv',
-            'Y': 'HIV_active',
-            'X': 'smiles',
-            'Bin_path': 'hiv_bins'
-        },
-        'Liphophilicity': {
-            'Path': 'LIPHOPHILICITY_csv',
-            'Y': 'exp',
-            'X': 'smiles',
-            'Bin_path': 'lipho_bins'
-        },
-        'BBBP': {
-            'Path': 'BBBP_csv',
-            'Y': 'p_np',
-            'X': 'smiles',
-            'Bin_path': 'bbbp_bins'
-        },
-        'Clintox': {
-            'Path': 'CLINTOX_csv',
-            'Y': 'CT_TOX',
-            'X': 'smiles',
-            'Bin_path': 'clintox_bins'
-        },
-        'Tox21': {
-            'Path': 'TOX_csv',
-            'Y': ['NR-AR', 'NR-AR-LBD', 'NR-AhR', 'NR-Aromatase', 'NR-ER', 'NR-ER-LBD', 'NR-PPAR-gamma', 'SR-ARE', 'SR-ATAD5', 'SR-HSE', 'SR-MMP', 'SR-p53'],
-            'X': 'smiles',
-            'Bin_path': 'tox_bins'
-        }
-    }
     dataset_hash = datasets[key]
     path_key, targets_key, smiles_key = dataset_hash['Path'], dataset_hash['Y'], dataset_hash['X']
     path = os.getenv(path_key)
@@ -108,11 +78,52 @@ def save_data_binaries(key):
     return
 
 
-def process_graphs():
+def download_function(p, datasets, key):
     load_dotenv('.env')
+    dataset_hash = datasets[key]
+    dataset = MolecularGraphDataset(key=dataset_hash['Bin_path'], root=os.getenv(
+        dataset_hash['graph_root'])+p[1]+'/data/', start=p[0], step=5141)
 
 
 if __name__ == '__main__':
+    datasets = {
+        'HIV': {
+            'Path': 'HIV_csv',
+            'Y': 'HIV_active',
+            'X': 'smiles',
+            'Bin_path': 'hiv_bins',
+            'graph_root': 'hiv_graph'
+        },
+        'Liphophilicity': {
+            'Path': 'LIPHOPHILICITY_csv',
+            'Y': 'exp',
+            'X': 'smiles',
+            'Bin_path': 'lipho_bins',
+            'graph_root': 'lipho_graph'
+        },
+        'BBBP': {
+            'Path': 'BBBP_csv',
+            'Y': 'p_np',
+            'X': 'smiles',
+            'Bin_path': 'bbbp_bins',
+            'graph_root': 'bbbp_graph'
+        },
+        'Clintox': {
+            'Path': 'CLINTOX_csv',
+            'Y': 'CT_TOX',
+            'X': 'smiles',
+            'Bin_path': 'clintox_bins',
+            'graph_root': 'clintox_graph'
+        },
+        'Tox21': {
+            'Path': 'TOX_csv',
+            'Y': ['NR-AR', 'NR-AR-LBD', 'NR-AhR', 'NR-Aromatase', 'NR-ER', 'NR-ER-LBD', 'NR-PPAR-gamma', 'SR-ARE', 'SR-ATAD5', 'SR-HSE', 'SR-MMP', 'SR-p53'],
+            'X': 'smiles',
+            'Bin_path': 'tox_bins',
+            'graph_root': 'tox_graph'
+        }
+    }
+
     print("Press 1 to save binaries for property datasets \
           2 to download the zinc dataset \
           3 to save binaries of the zinc dataset \
@@ -129,3 +140,25 @@ if __name__ == '__main__':
         download_zinc()
     elif choice == 3:
         pretrainer_binaries()
+    elif choice == 4:
+        ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21']
+        idx = int(input("Enter the Dataset index: "))
+        key = ds[idx]
+
+        params = [(0, 'Fold1'), (5141, 'Fold2'), (10282, 'Fold3'),
+                  (15423, 'Fold4'), (20564, 'Fold5'), (25705, 'Fold6'),
+                  (30846, 'Fold7'), (35987, 'Fold8')]
+        start_time = time.perf_counter()
+        processes = list()
+        n_processes = 8
+        for i in range(n_processes):
+            p = multiprocessing.Process(
+                target=download_function, args=(params[i], datasets, key,))
+            p.start()
+
+            processes.append(p)
+
+        for p in processes:
+            p.join()
+        finish_time = time.perf_counter()
+        print(f"Download completed in {finish_time-start_time} seconds")

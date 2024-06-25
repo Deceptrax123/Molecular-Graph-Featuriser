@@ -30,7 +30,7 @@ def graphs(item):
     X = np.zeros((n_nodes, n_node_features))
     for atom in mol.GetAtoms():
         X[atom.GetIdx(), :] = get_atom_features(atom)
-    X = torch.tensor(X, torch.float)
+    X = torch.tensor(X, dtype=torch.float)
 
     rows, cols = np.nonzero(GetAdjacencyMatrix(mol))
     torch_rows = torch.from_numpy(rows.astype(np.int64)).to(torch.long)
