@@ -1,9 +1,16 @@
+import concurrent.futures
+import multiprocessing
 import pandas as pd
 from dotenv import load_dotenv
 import pickle
 import os
-import multiprocessing
-import concurrent.futures
+import numpy as np
+
+
+def preprocess_tox21(data, cols):
+    for c in cols:
+        data[c] = data[c].fillna(data[c].mode()[0])
+    return data
 
 
 def save_data_binaries(key):
@@ -60,6 +67,24 @@ def save_data_binaries(key):
             f_num += 1
         print("Binaries Saved!!!!!!")
         return
+    # Handle te NaN Values in the dataset
+    data = preprocess_tox21(data, cols=targets_key)
+    smiles = data[smiles_key]
+    t = list()
+    for target in targets_key:
+        t.append(data[target])
+
+    t = np.array(t).T.tolist()
+    z = list(zip(smiles, t))
+    for f_num in range(len(z)):
+        file_name = os.path.join(
+            os.getenv(dataset_hash['Bin_path']), str(f_num))
+
+        with open(file_name, 'wb') as fp:
+            pickle.dump(z[f_num], fp)
+        print(f"File {f_num} saved.....")
+    print("Binaries Saved!!!!!")
+    return
 
 
 if __name__ == '__main__':
