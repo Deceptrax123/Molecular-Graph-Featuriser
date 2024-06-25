@@ -108,6 +108,10 @@ def save_data_binaries(key):
     return
 
 
+def process_graphs():
+    load_dotenv('.env')
+
+
 if __name__ == '__main__':
     print("Press 1 to save binaries for property datasets \
           2 to download the zinc dataset \
