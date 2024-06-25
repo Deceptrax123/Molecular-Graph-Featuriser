@@ -131,13 +131,13 @@ if __name__ == '__main__':
     print("Press 1 to save binaries for property datasets \
           2 to download the zinc dataset \
           3 to save binaries of the zinc dataset \
-          4 to save graphs for the property datasets \
-          5 to save graphs for the zinc dataset")
+          4 to save graphs")
 
     choice = int(input("Enter choice: "))
     if choice == 1:
         ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21']
-        idx = int(input("Enter the Dataset index: "))
+        idx = int(input(
+            "Enter the Dataset index: ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21', 'Zinc'] "))
         key = ds[idx]
         save_data_binaries(key)
     elif choice == 2:
@@ -146,7 +146,8 @@ if __name__ == '__main__':
         pretrainer_binaries()
     elif choice == 4:
         ds = ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21', 'Zinc']
-        idx = int(input("Enter the Dataset index: "))
+        idx = int(input(
+            "Enter the Dataset index: ['HIV', 'Liphophilicity', 'BBBP', 'Clintox', 'Tox21', 'Zinc'] "))
         key = ds[idx]
 
         params = [(0, 'Fold1'), (31182, 'Fold2'), (62364, 'Fold3'),
